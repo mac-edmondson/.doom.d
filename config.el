@@ -118,6 +118,10 @@
   ;; Make some 'extras' keymaps
   (map! :leader :prefix-map ("e" . "extras")
                             (:desc "Fireplace" "f" #'fireplace))
+  ;; Make a new binding to search for all files in a project or at the current directory if not in a project
+  (map! :leader
+      (:prefix-map ("f" . "file")
+       :desc "Find all files" "a" #'consult-fd))
   ;; Re-map leader x to open the scratch buffer in a new window, not just just
   ;; as a popup
   ;; TODO (map! :leader :desc "Open scratch buffer in new winodow" "x" #'+popup/raise)
@@ -149,3 +153,16 @@
                    (:exec . ("%c %s"))
                    (:description . "Run Python3 file"))))
   (add-to-list 'quickrun-file-alist '("\\.py$" . "python3")))
+
+;; Setup projectile's indexing method use a combination of tools like git and projectiles built-in method
+(setq projectile-indexing-method 'hybrid)
+
+;; Make sure 'consult-fd' can see ignored files (e.g. files in .gitignore)
+;; TODO - probably want to add and 'after!' clause for this.
+(setq consult-fd-args
+      '((if (executable-find "fdfind" 'remote) "fdfind" "fd")
+        "--color=never"
+        ;; https://github.com/sharkdp/fd/issues/839
+        "--full-path --absolute-path"
+        "--no-ignore --hidden --exclude .git"
+        (if (featurep :system 'windows) "--path-separator=/")))
