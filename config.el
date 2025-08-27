@@ -166,3 +166,32 @@
         "--full-path --absolute-path"
         "--no-ignore --hidden --exclude .git"
         (if (featurep :system 'windows) "--path-separator=/")))
+
+;; Use VHDL ext
+;; TODO Get flycheck working with a linter. Investigate the other commented out features.
+(use-package! vhdl-ext
+  :hook ((vhdl-mode . vhdl-ext-mode))
+  :init
+  ;; Can also be set through `M-x RET customize-group RET vhdl-ext':
+  ;; Comment out/remove the ones you do not need
+  (setq vhdl-ext-feature-list
+        '(font-lock
+          xref
+          capf
+          hierarchy
+          eglot
+          lsp
+          ;; lsp-bridge
+          ;; lspce
+          ;; flycheck
+          beautify
+          navigation
+          template
+          compilation
+          imenu
+          which-func
+          hideshow
+          ;; time-stamp
+          ports))
+  :config
+  (vhdl-ext-mode-setup))

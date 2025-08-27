@@ -50,3 +50,6 @@
 
 ;; Make DOOM cozy :)
 (package! fireplace)
+
+;; A bit of the VHDL
+(package! vhdl-ext)
