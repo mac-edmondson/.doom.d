@@ -195,3 +195,11 @@
           ports))
   :config
   (vhdl-ext-mode-setup))
+
+;; Make org-mode display line numbers as visual, which displays a relative number even for wrapped lines.
+(defun my/enable-visual-line-numbers ()
+  (display-line-numbers-mode -1) ;; disable line numbers temporarily
+  (setq-local display-line-numbers-type `visual) ;; for the buffer, make the line numbers visual
+  (display-line-numbers-mode t)) ;; re-enable the display of line numbers
+
+(add-hook! 'org-mode-hook :append #'my/enable-visual-line-numbers)
