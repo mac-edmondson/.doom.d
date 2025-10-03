@@ -98,7 +98,7 @@
   (insert ?\n)
   (evil-previous-line)
   (evil-end-of-line)
-  (insert ?\ ))
+  (append ?\ ))
 
 (defun my/comment-or-uncomment-line-or-region ()
   "Comments or uncomments the current line or region."
@@ -131,7 +131,9 @@
   (map! :leader :n "l" #'end-of-line
                    "h" #'beginning-of-line)
   (map! :n "K" #'my/insert-newline-and-move
-           "C-/" #'my/comment-or-uncomment-line-or-region))
+           "C-/" #'my/comment-or-uncomment-line-or-region )
+  ;; Map a spell-check correction to be more like what I'm used to
+  (map! :n "C-." #'+spell/correct))
 
 ;; Below is copied and modified from
 ;; ~/.emacs.d.doom/modules/config/default/config.el to ensure the 'which-key'
