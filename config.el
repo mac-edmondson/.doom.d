@@ -80,7 +80,9 @@
 (setq fancy-splash-image (concat doom-user-dir "splash.svg"))
 
 ;; Increase default font size
-(setq doom-font (font-spec :size 30))
+(if (string= (system-name) "Macs-Air")
+        (setq doom-font (font-spec :size 20))
+        (setq doom-font (font-spec :size 30)))
 
 ;; Define the python interpreter for 'org-mode'
 (setq org-babel-python-command "python3")
