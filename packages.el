@@ -53,3 +53,6 @@
 
 ;; A bit of the VHDL
 (package! vhdl-ext)
+
+;; ultra-scroll for smooth scrolling -- really nice for a trackpad
+(package! ultra-scroll)

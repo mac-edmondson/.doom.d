@@ -171,6 +171,14 @@
         "--no-ignore --hidden --exclude .git"
         (if (featurep :system 'windows) "--path-separator=/")))
 
+;; Use the ultra-scroll package
+(use-package! ultra-scroll
+  :init
+  (setq scroll-conservatively 3 ; or whatever value you prefer, since v0.4
+        scroll-margin 0)        ; important: scroll-margin>0 not yet supported
+  :config
+  (ultra-scroll-mode 1))
+
 ;; Use VHDL ext
 ;; TODO Get flycheck working with a linter. Investigate the other commented out features.
 (use-package! vhdl-ext
