@@ -215,3 +215,7 @@
   (display-line-numbers-mode t)) ;; re-enable the display of line numbers
 
 (add-hook! 'org-mode-hook :append #'my/enable-visual-line-numbers)
+
+;; TODO Consider adding below to align all org-mode tables when an org file is
+;; opened. Need to figure out if an !after should be used with this?
+;; (setq org-startup-align-all-tables t)
