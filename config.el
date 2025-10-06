@@ -80,7 +80,7 @@
 (setq fancy-splash-image (concat doom-user-dir "splash.svg"))
 
 ;; Increase default font size
-(if (string= (system-name) "Macs-Air")
+(if (string= (system-name) "Macs-MacBook-Air.local")
         (setq doom-font (font-spec :size 20))
         (setq doom-font (font-spec :size 30)))
 
