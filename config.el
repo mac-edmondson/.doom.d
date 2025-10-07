@@ -76,11 +76,14 @@
 
 ;; STARTING HERE is my basic custom confiugration
 
+;; TODO there's gotta be a cleaner way to do this and make the variables fall under some kind of library
+(load "~/.doom.d/machine.el")
+
 ;; Change the splash screen to only the best logo
 (setq fancy-splash-image (concat doom-user-dir "splash.svg"))
 
 ;; Increase default font size
-(if (string= (system-name) "Macs-MacBook-Air.local")
+(if (string= my-machine-id "Macs-MacBook-Air")
         (setq doom-font (font-spec :size 20))
         (setq doom-font (font-spec :size 30)))
 
