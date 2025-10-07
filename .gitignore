@@ -1,2 +1,3 @@
-machine.el # ignore the machine specific configuration file
+# ignore the machine specific configuration file
+/machine.el 
 
