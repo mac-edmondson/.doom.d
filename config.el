@@ -244,3 +244,9 @@
   ;; Set the list of files org-agenda works on
   (setq org-agenda-files '("~/org/"
                            "~/org/calendars/canvas.org")))
+
+;; Setup some stuff for Magit
+(after! magit
+  (setq git-commit-style-convention-checks
+        (remove 'overlong-summary-line git-commit-style-convention-checks))
+)
