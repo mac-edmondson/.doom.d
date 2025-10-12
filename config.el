@@ -76,16 +76,20 @@
 
 ;; STARTING HERE is my basic custom confiugration
 
-;; TODO there's gotta be a cleaner way to do this and make the variables fall under some kind of library
-(load "~/.doom.d/machine.el")
-
 ;; Change the splash screen to only the best logo
 (setq fancy-splash-image (concat doom-user-dir "splash.svg"))
 
-;; Increase default font size
-(if (string= my-machine-id "Macs-MacBook-Air")
-        (setq doom-font (font-spec :size 20))
-        (setq doom-font (font-spec :size 30)))
+;; Change the default font size
+(let ((font-size 10))
+  ;; If the machine ID is defined, check its value.
+  (when (boundp 'my-machine-id)
+    (setq font-size
+          (cl-case my-machine-id
+            ('machineconst-id-macbook 20)
+            ('machineconst-id-asus    30)
+            (otherwise                font-size))))
+  ;;Set the font only once using the selected size.
+  (setq doom-font (font-spec :size font-size)))
 
 ;; Define the python interpreter for 'org-mode'
 (setq org-babel-python-command "python3")
@@ -222,3 +226,18 @@
 ;; TODO Consider adding below to align all org-mode tables when an org file is
 ;; opened. Need to figure out if an !after should be used with this?
 ;; (setq org-startup-align-all-tables t)
+
+;; ~/.doom.d/config.el
+(use-package! org-ics-import
+  :custom
+  ;; Set the update interval to once an hour
+  (org-ics-import-update-interval 3600)
+  ;; Grab the calendars we want
+  (org-ics-import-calendars-alist '(("https://canvas.utn.de/feeds/calendars/user_d4RT3Yeyn7F1VRPgwrJjiX6MYzyiQ7O6KOo3w2sO.ics" . "~/org/calendars/canvas.org")))
+  (org-ics-import-exclude-strings '("Cancelled")))
+
+;; Setup some org-mode stuff
+(after! org
+  ;; Set the list of files org-agenda works on
+  (setq org-agenda-files '("~/org/"
+                           "~/org/calendars/canvas.org")))

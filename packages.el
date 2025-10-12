@@ -56,3 +56,7 @@
 
 ;; ultra-scroll for smooth scrolling -- really nice for a trackpad
 (package! ultra-scroll)
+
+;; A package to update ics calendars into org files on a regular interval
+(package! org-ics-import
+  :recipe (:repo "https://git.sr.ht/~struanr/org-ics-import.el"))

@@ -1,0 +1,10 @@
+;;; machine.el -- Contains machine related constants. -*- lexical-binding: t; -*-
+;;; Commentary:
+;;; This file should be custom defined per machine.
+
+;;; Code:
+(defconst my-machine-id "Macs-MacBook-Air"
+  "A custom identifier for the current machine.")
+
+(provide 'machine)
+;;; machine.el ends here

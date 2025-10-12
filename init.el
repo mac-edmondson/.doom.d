@@ -197,3 +197,10 @@
        :config
        ;;literate
        (default +bindings +smartparens))
+
+;; Load custom package files
+;; 1. Add the .doom.d/lisp directory to the load-path
+(add-to-list 'load-path (expand-file-name "lisp" doom-user-dir))
+;; 2. Require the packages that come from that directory
+(require 'machineconst)
+(require 'machine)

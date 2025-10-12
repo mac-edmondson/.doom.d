@@ -1,0 +1,6 @@
+#+title: Readme
+
+* Readme
+This directory contains custom packages for use throughout the Emacs configuration.
+** Template Files
+This directory has some template files that should be custom on a per machine basis. These template files should be copied to a file without the ".template" extension, then modified as necessary.
