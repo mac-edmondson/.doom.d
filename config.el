@@ -169,14 +169,17 @@
 (setq projectile-indexing-method 'hybrid)
 
 ;; Make sure 'consult-fd' can see ignored files (e.g. files in .gitignore)
-;; TODO - probably want to add and 'after!' clause for this.
-(setq consult-fd-args
-      '((if (executable-find "fdfind" 'remote) "fdfind" "fd")
-        "--color=never"
-        ;; https://github.com/sharkdp/fd/issues/839
-        "--full-path --absolute-path"
-        "--no-ignore --hidden --exclude .git"
-        (if (featurep :system 'windows) "--path-separator=/")))
+;; https://github.com/sharkdp/fd/issues/839
+(after! consult
+  (setq consult-fd-args
+        `(,(if (executable-find "fdfind") "fdfind" "fd")
+          "--type" "f"
+          "--color=never"
+          "--absolute-path"
+          "--no-ignore"      ;; Don't respect .gitignore
+          "--hidden"         ;; Search hidden files
+          "--exclude" ".git" ;; Exclude the .git directory itself
+          )))
 
 ;; Use the ultra-scroll package
 (use-package! ultra-scroll
