@@ -89,7 +89,9 @@
             ('machineconst-id-asus    30)
             (otherwise                font-size))))
   ;;Set the font only once using the selected size.
-  (setq doom-font (font-spec :size font-size)))
+  (setq doom-font (font-spec :family "JetBrainsMono Nerd Font" :size font-size) 
+        doom-variable-pitch-font (font-spec :family "Iosevka Aile" :size (+ font-size 2)) 
+        doom-symbol-font (font-spec :family "Symbola" :size font-size))) ;; Fallback font for symbols
 
 ;; Define the python interpreter for 'org-mode'
 (setq org-babel-python-command "python3")
@@ -218,14 +220,6 @@
   :config
   (vhdl-ext-mode-setup))
 
-;; Make org-mode display line numbers as visual, which displays a relative number even for wrapped lines.
-(defun my/enable-visual-line-numbers ()
-  (display-line-numbers-mode -1) ;; disable line numbers temporarily
-  (setq-local display-line-numbers-type `visual) ;; for the buffer, make the line numbers visual
-  (display-line-numbers-mode t)) ;; re-enable the display of line numbers
-
-(add-hook! 'org-mode-hook :append #'my/enable-visual-line-numbers)
-
 ;; TODO Consider adding below to align all org-mode tables when an org file is
 ;; opened. Need to figure out if an !after should be used with this?
 ;; (setq org-startup-align-all-tables t)
@@ -240,13 +234,76 @@
   (org-ics-import-exclude-strings '("Cancelled")))
 
 ;; Setup some org-mode stuff
+
+;; Function definitions for use in org-mode configuration
+(defun my/enable-visual-line-numbers ()
+  (display-line-numbers-mode -1) ;; disable line numbers temporarily
+  (setq-local display-line-numbers-type `visual) ;; for the buffer, make the line numbers visual
+  (display-line-numbers-mode t)) ;; re-enable the display of line numbers
+
 (after! org
-  ;; Set the list of files org-agenda works on
-  (setq org-agenda-files '("~/org/"
-                           "~/org/calendars/canvas.org")))
+  ;; Make org-mode display line numbers as visual, which displays a relative number even for wrapped lines.
+  (add-hook! 'org-mode-hook :append #'my/enable-visual-line-numbers)
+
+ ;; Set the list of files org-agenda works on
+ (setq org-agenda-files '("~/org/"
+                          "~/org/calendars/canvas.org"))
+ ;; TODO Make this an 'add-to-list'
+ (setq org-agenda-custom-commands
+       '(
+         ;; School agenda view
+         ("S" "School" ;; Describe the name prefix
+          ;; List of commands
+          ((agenda ""
+                      ;; Settings for command
+                      ((org-agenda-overriding-header "Day View")
+                       (org-agenda-span 'day)
+                       (org-agenda-start-day "0d")))
+           (tags-todo "@ai" 
+                      ;; Settings for command
+                      ((org-agenda-overriding-header "AI Tasks")))
+           (tags-todo "@robotics" 
+                      ;; Settings for command
+                      ((org-agenda-overriding-header "Robotics Tasks")))
+           (tags-todo "@ml" 
+                      ;; Settings for command
+                      ((org-agenda-overriding-header "Machine Learning Tasks")))
+           (tags-todo "@dataeng" 
+                      ;; Settings for command
+                      ((org-agenda-overriding-header "Data Engineering Tasks"))))
+          ;; List of 'general-settings-for-whole-set'
+          ((org-agenda-files '("~/org/school.org")))
+          ;; Files to write to
+          ("~/org/school.html"))
+          
+         ;; TODO: This view needs some work.
+         ;; Canvas agenda view
+         ("c" "Canvas" ;; Describe the name prefix
+          ;; List of commands
+          (
+           (search "[W25M-MOBBA]/TODO" 
+                      ;; Settings for command
+                      ((org-agenda-overriding-header "AI Tasks")))
+           (tags-todo "@robotics" 
+                      ;; Settings for command
+                      ((org-agenda-overriding-header "Robotics Tasks")))
+           (tags-todo "@ml" 
+                      ;; Settings for command
+                      ((org-agenda-overriding-header "Machine Learning Tasks")))
+           (tags-todo "@dataeng" 
+                      ;; Settings for command
+                      ((org-agenda-overriding-header "Data Engineering Tasks")))
+           (agenda ""
+                      ;; Settings for command
+                      ((org-agenda-overriding-header "Day View")
+                       (org-agenda-span 9)
+                       (org-agenda-start-day "-1d"))))
+          ;; List of 'general-settings-for-whole-set'
+          ((org-agenda-files '("~/org/calendars/canvas.org")))
+          ;; Files to write to
+          ("~/org/canvas.html")))))
 
 ;; Setup some stuff for Magit
 (after! magit
   (setq git-commit-style-convention-checks
-        (remove 'overlong-summary-line git-commit-style-convention-checks))
-)
+        (remove 'overlong-summary-line git-commit-style-convention-checks)))
