@@ -241,6 +241,23 @@
   (setq-local display-line-numbers-type `visual) ;; for the buffer, make the line numbers visual
   (display-line-numbers-mode t)) ;; re-enable the display of line numbers
 
+(after! doom-modeline
+  ;; Make the modeline file name a bit more dynamic. This helps prevent long
+  ;; file names from running of the modeline.
+  (setq doom-modeline-buffer-file-name-style 'auto)
+)
+
+(after! python
+  ;; Set the python interpreter
+  (let ((interpreter "python3"))
+    (when (boundp 'my-machine-id)
+      (setq interpreter
+            (cl-case my-machine-id
+              ('machineconst-id-macbook "~/.venv/global/bin/python3")
+              (otherwise                interpreter))))
+    (setq python-interpreter interpreter)
+    (setq python-shell-interpreter interpreter)))
+
 (after! org
   ;; Make org-mode display line numbers as visual, which displays a relative number even for wrapped lines.
   (add-hook! 'org-mode-hook :append #'my/enable-visual-line-numbers)
@@ -248,6 +265,10 @@
  ;; Set the list of files org-agenda works on
  (setq org-agenda-files '("~/org/"
                           "~/org/calendars/canvas.org"))
+
+ ;; Make the current clock show up in only in the frame title
+ (setq org-clock-clocked-in-display 'frame-title)
+ 
  ;; TODO Make this an 'add-to-list'
  (setq org-agenda-custom-commands
        '(
