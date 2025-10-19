@@ -124,25 +124,31 @@
   ;; Re-map the 'help-map'
   (map! :leader :desc "help" "H" help-map)
   ;; Swap the position of the dired and the debug bindings in the open menu
-  (map! :leader :prefix "o" (:desc "Dired" "d" #'dired-jump)
-                            (:desc "Start a debugger" "-" #'+debugger/start))
+  (map! :leader :prefix "o" 
+        (:desc "Dired" "d" #'dired-jump)
+        (:desc "Start a debugger" "-" #'+debugger/start))
   ;; Make some 'extras' keymaps
   (map! :leader :prefix-map ("e" . "extras")
-                            (:desc "Fireplace" "f" #'fireplace))
+        (:desc "Fireplace" "f" #'fireplace))
   ;; Make a new binding to search for all files in a project or at the current directory if not in a project
   (map! :leader
-      (:prefix-map ("f" . "file")
-       :desc "Find all files" "a" #'consult-fd))
+        (:prefix-map ("f" . "file")
+         :desc "Find all files" "a" #'consult-fd))
   ;; Re-map leader x to open the scratch buffer in a new window, not just just
   ;; as a popup
   ;; TODO (map! :leader :desc "Open scratch buffer in new winodow" "x" #'+popup/raise)
   ;; Add some custom keybindings
-  (map! :leader :n "l" #'end-of-line
-                   "h" #'beginning-of-line)
-  (map! :n "K" #'my/insert-newline-and-move
-           "C-/" #'my/comment-or-uncomment-line-or-region )
+  (map! :leader :n 
+        "l" #'end-of-line
+        "h" #'beginning-of-line)
+  (map! :n 
+        "K" #'my/insert-newline-and-move
+        "C-/" #'my/comment-or-uncomment-line-or-region )
   ;; Map a spell-check correction to be more like what I'm used to
-  (map! :n "C-." #'+spell/correct))
+  (map! :n "C-." #'+spell/correct)
+  ;; Make some "g" key bindings
+  (map! :prefix "g" 
+        :n "h" #'+lookup/documentation))
 
 ;; Below is copied and modified from
 ;; ~/.emacs.d.doom/modules/config/default/config.el to ensure the 'which-key'
@@ -241,88 +247,83 @@
   (setq-local display-line-numbers-type `visual) ;; for the buffer, make the line numbers visual
   (display-line-numbers-mode t)) ;; re-enable the display of line numbers
 
+;; Customize the doom modeline
 (after! doom-modeline
-  ;; Make the modeline file name a bit more dynamic. This helps prevent long
-  ;; file names from running of the modeline.
-  (setq doom-modeline-buffer-file-name-style 'auto)
-)
+  (setq doom-modeline-buffer-file-name-style 'file-name-with-project)
+  (setq doom-modeline-buffer-encoding nil)
+  (setq doom-modeline-percent-position '(0 ""))
+  )
 
 (after! python
-  ;; Set the python interpreter
-  (let ((interpreter "python3"))
-    (when (boundp 'my-machine-id)
-      (setq interpreter
-            (cl-case my-machine-id
-              ('machineconst-id-macbook "~/.venv/global/bin/python3")
-              (otherwise                interpreter))))
-    (setq python-interpreter interpreter)
-    (setq python-shell-interpreter interpreter)))
+  ;; Note: For python stuff to work without pain, ensure the executables needed
+  ;; are on the path. 'doom doctor' will tell you if anything is missing.
+  (setq lsp-pyright-langserver-command "basedpyright"))
 
 (after! org
   ;; Make org-mode display line numbers as visual, which displays a relative number even for wrapped lines.
   (add-hook! 'org-mode-hook :append #'my/enable-visual-line-numbers)
 
- ;; Set the list of files org-agenda works on
- (setq org-agenda-files '("~/org/"
-                          "~/org/calendars/canvas.org"))
+  ;; Set the list of files org-agenda works on
+  (setq org-agenda-files '("~/org/"
+                           "~/org/calendars/canvas.org"))
 
- ;; Make the current clock show up in only in the frame title
- (setq org-clock-clocked-in-display 'frame-title)
- 
- ;; TODO Make this an 'add-to-list'
- (setq org-agenda-custom-commands
-       '(
-         ;; School agenda view
-         ("S" "School" ;; Describe the name prefix
-          ;; List of commands
-          ((agenda ""
-                      ;; Settings for command
-                      ((org-agenda-overriding-header "Day View")
-                       (org-agenda-span 'day)
-                       (org-agenda-start-day "0d")))
-           (tags-todo "@ai" 
-                      ;; Settings for command
-                      ((org-agenda-overriding-header "AI Tasks")))
-           (tags-todo "@robotics" 
-                      ;; Settings for command
-                      ((org-agenda-overriding-header "Robotics Tasks")))
-           (tags-todo "@ml" 
-                      ;; Settings for command
-                      ((org-agenda-overriding-header "Machine Learning Tasks")))
-           (tags-todo "@dataeng" 
-                      ;; Settings for command
-                      ((org-agenda-overriding-header "Data Engineering Tasks"))))
-          ;; List of 'general-settings-for-whole-set'
-          ((org-agenda-files '("~/org/school.org")))
-          ;; Files to write to
-          ("~/org/school.html"))
+  ;; Make the current clock show up in only in the frame title
+  (setq org-clock-clocked-in-display 'frame-title)
+  
+  ;; TODO Make this an 'add-to-list'
+  (setq org-agenda-custom-commands
+        '(
+          ;; School agenda view
+          ("S" "School" ;; Describe the name prefix
+           ;; List of commands
+           ((agenda ""
+                    ;; Settings for command
+                    ((org-agenda-overriding-header "Day View")
+                     (org-agenda-span 'day)
+                     (org-agenda-start-day "0d")))
+            (tags-todo "@ai" 
+                       ;; Settings for command
+                       ((org-agenda-overriding-header "AI Tasks")))
+            (tags-todo "@robotics" 
+                       ;; Settings for command
+                       ((org-agenda-overriding-header "Robotics Tasks")))
+            (tags-todo "@ml" 
+                       ;; Settings for command
+                       ((org-agenda-overriding-header "Machine Learning Tasks")))
+            (tags-todo "@dataeng" 
+                       ;; Settings for command
+                       ((org-agenda-overriding-header "Data Engineering Tasks"))))
+           ;; List of 'general-settings-for-whole-set'
+           ((org-agenda-files '("~/org/school.org")))
+           ;; Files to write to
+           ("~/org/school.html"))
           
-         ;; TODO: This view needs some work.
-         ;; Canvas agenda view
-         ("c" "Canvas" ;; Describe the name prefix
-          ;; List of commands
-          (
-           (search "[W25M-MOBBA]/TODO" 
-                      ;; Settings for command
-                      ((org-agenda-overriding-header "AI Tasks")))
-           (tags-todo "@robotics" 
-                      ;; Settings for command
-                      ((org-agenda-overriding-header "Robotics Tasks")))
-           (tags-todo "@ml" 
-                      ;; Settings for command
-                      ((org-agenda-overriding-header "Machine Learning Tasks")))
-           (tags-todo "@dataeng" 
-                      ;; Settings for command
-                      ((org-agenda-overriding-header "Data Engineering Tasks")))
-           (agenda ""
-                      ;; Settings for command
-                      ((org-agenda-overriding-header "Day View")
-                       (org-agenda-span 9)
-                       (org-agenda-start-day "-1d"))))
-          ;; List of 'general-settings-for-whole-set'
-          ((org-agenda-files '("~/org/calendars/canvas.org")))
-          ;; Files to write to
-          ("~/org/canvas.html")))))
+          ;; TODO: This view needs some work.
+          ;; Canvas agenda view
+          ("c" "Canvas" ;; Describe the name prefix
+           ;; List of commands
+           (
+            (search "[W25M-MOBBA]/TODO" 
+                    ;; Settings for command
+                    ((org-agenda-overriding-header "AI Tasks")))
+            (tags-todo "@robotics" 
+                       ;; Settings for command
+                       ((org-agenda-overriding-header "Robotics Tasks")))
+            (tags-todo "@ml" 
+                       ;; Settings for command
+                       ((org-agenda-overriding-header "Machine Learning Tasks")))
+            (tags-todo "@dataeng" 
+                       ;; Settings for command
+                       ((org-agenda-overriding-header "Data Engineering Tasks")))
+            (agenda ""
+                    ;; Settings for command
+                    ((org-agenda-overriding-header "Day View")
+                     (org-agenda-span 9)
+                     (org-agenda-start-day "-1d"))))
+           ;; List of 'general-settings-for-whole-set'
+           ((org-agenda-files '("~/org/calendars/canvas.org")))
+           ;; Files to write to
+           ("~/org/canvas.html")))))
 
 ;; Setup some stuff for Magit
 (after! magit
