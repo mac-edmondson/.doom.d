@@ -165,14 +165,6 @@
                   nil . "bindings")
                 which-key-replacement-alist)))
 
-(after! quickrun
-  ;; add 'python3' as quickrun language
-  (quickrun-add-command "python3"
-    '("python3" . ((:command . "python3")
-                   (:exec . ("%c %s"))
-                   (:description . "Run Python3 file"))))
-  (add-to-list 'quickrun-file-alist '("\\.py$" . "python3")))
-
 ;; Setup projectile's indexing method use a combination of tools like git and projectiles built-in method
 (setq projectile-indexing-method 'hybrid)
 
@@ -254,6 +246,19 @@
   (setq doom-modeline-percent-position '(0 ""))
   )
 
+(defun my/pyvenv-activate-deactivate-hook()
+  ;; Find the path of the python interpreter that is furthest up in the
+  ;; "exec-path"
+  (setq python-shell-interpreter (executable-find "python3")))
+
+(after! pyvenv
+  ;; Set the workon directory for pyvenv
+  (setenv "WORKON_HOME" "~/.venv")
+  ;; set some hooks to make pyvenv work as as it should with Doom's "eval". 
+  (add-hook! 'pyvenv-post-activate-hooks :append #'my/pyvenv-activate-deactivate-hook)
+  (add-hook! 'pyvenv-post-deactivate-hooks :append #'my/pyvenv-activate-deactivate-hook))
+
+
 (after! python
   ;; Note: For python stuff to work without pain, ensure the executables needed
   ;; are on the path. 'doom doctor' will tell you if anything is missing.
@@ -269,7 +274,7 @@
 
   ;; Make the current clock show up in only in the frame title
   (setq org-clock-clocked-in-display 'frame-title)
-  
+
   ;; TODO Make this an 'add-to-list'
   (setq org-agenda-custom-commands
         '(
