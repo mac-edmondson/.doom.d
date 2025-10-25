@@ -181,6 +181,12 @@
           "--exclude" ".git" ;; Exclude the .git directory itself
           )))
 
+;; Use the org-fragtog package for inline previews
+;; TODO figure out why this doesn't work. I think you need compiled elisp support?
+;; (use-package! org-fragtog
+;;   :after org
+;;   :hook (org-mode . org-fragtog)) ; this auto-enables it when you enter an org-buffer
+
 ;; Use the ultra-scroll package
 (use-package! ultra-scroll
   :init
@@ -249,7 +255,10 @@
 (defun my/pyvenv-activate-deactivate-hook()
   ;; Find the path of the python interpreter that is furthest up in the
   ;; "exec-path"
-  (setq python-shell-interpreter (executable-find "python3")))
+  (let ((p-int (executable-find "python3")))
+    (setq python-shell-interpreter p-int)
+    ;; Make org-babel use the venv
+    (setq org-babel-python-command p-int)))
 
 (after! pyvenv
   ;; Set the workon directory for pyvenv
@@ -260,7 +269,10 @@
 
 
 (after! python
-  ;; Note: For python stuff to work without pain, ensure the executables needed
+  ;; On boot of emacs, find the python executable on the path
+  ;; TODO make this specific to each machine? Or figure something else out.
+  (setq python-interpreter "~/.venv/global/bin/python3")
+  ;; Note: For python stuff to work without pain, ensure the executable needed
   ;; are on the path. 'doom doctor' will tell you if anything is missing.
   (setq lsp-pyright-langserver-command "basedpyright"))
 

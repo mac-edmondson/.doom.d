@@ -54,6 +54,9 @@
 ;; A bit of the VHDL
 (package! vhdl-ext)
 
+;; org-fragtog for inline latex preview automation
+(package! org-fragtog)
+
 ;; ultra-scroll for smooth scrolling -- really nice for a trackpad
 (package! ultra-scroll)
 
