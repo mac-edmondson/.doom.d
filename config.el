@@ -235,7 +235,8 @@
   (org-ics-import-update-interval 3600)
   ;; Grab the calendars we want
   (org-ics-import-calendars-alist '(("https://canvas.utn.de/feeds/calendars/user_d4RT3Yeyn7F1VRPgwrJjiX6MYzyiQ7O6KOo3w2sO.ics" . "~/org/calendars/canvas.org")))
-  (org-ics-import-exclude-strings '("Cancelled")))
+  (org-ics-import-exclude-strings '("Cancelled"))
+  (org-ics-import-exclude-passed-events nil))
 
 ;; Setup some org-mode stuff
 
@@ -244,6 +245,42 @@
   (display-line-numbers-mode -1) ;; disable line numbers temporarily
   (setq-local display-line-numbers-type `visual) ;; for the buffer, make the line numbers visual
   (display-line-numbers-mode t)) ;; re-enable the display of line numbers
+
+;; TODO this is getting to be a mess and could use some serious cleanup.
+;; Probably need to move things into separate files.
+(defun my/corfu-cleanup-once (&rest _)
+  "Run cleanup tasks after Corfu closes."
+  (modify-syntax-entry ?: ".")
+  (advice-remove #'corfu--teardown #'my/corfu-cleanup))
+
+(defun my/completion-at-point-with-temp-symbol-char ()
+  "Run #'completion-at-point after temporarily making : a word character.  When
+corfu closes, it will be restored to a punctuation character with the
+'my/corfu-cleanup-once' function."
+  (modify-syntax-entry ?: "_")
+  (funcall #'completion-at-point)
+  (advice-add #'corfu--teardown :after #'my/corfu-cleanup))
+
+(defun my/org-trigger-dabbrev-for-latex-ref ()
+  "Manually trigger 'dabbrev-completion' after 'eq:'."
+  ;; Check if the last typed char was a colon
+  (when (and (eq last-command-event ?:)
+             ;; Check if text just before the colon is "eq"
+             (looking-back "ref{\\w+:" nil))
+    
+    ;; If so, manually call the function you found.
+    ;; Corfu will intercept this and show its popup.
+    (my/completion-at-point-with-temp-symbol-char)))
+
+(defun my/org-add-buffer-completions ()
+  ;; Add dabbrev to the list of completion sources
+  (add-to-list 'completion-at-point-functions #'cape-dabbrev)
+  ;; 2. Add our special trigger function to a local hook
+  (add-hook 'post-self-insert-hook
+            #'my/org-trigger-dabbrev-for-latex-ref
+            nil ; hook-depth
+            t   ; make hook buffer-local
+            ))
 
 ;; Customize the doom modeline
 (after! doom-modeline
@@ -267,7 +304,6 @@
   (add-hook! 'pyvenv-post-activate-hooks :append #'my/pyvenv-activate-deactivate-hook)
   (add-hook! 'pyvenv-post-deactivate-hooks :append #'my/pyvenv-activate-deactivate-hook))
 
-
 (after! python
   ;; On boot of emacs, find the python executable on the path
   ;; TODO make this specific to each machine? Or figure something else out.
@@ -280,69 +316,21 @@
   ;; Make org-mode display line numbers as visual, which displays a relative number even for wrapped lines.
   (add-hook! 'org-mode-hook :append #'my/enable-visual-line-numbers)
 
-  ;; Set the list of files org-agenda works on
-  (setq org-agenda-files '("~/org/"
-                           "~/org/calendars/canvas.org"))
-
-  ;; Make the current clock show up in only in the frame title
-  (setq org-clock-clocked-in-display 'frame-title)
-
-  ;; TODO Make this an 'add-to-list'
-  (setq org-agenda-custom-commands
-        '(
-          ;; School agenda view
-          ("S" "School" ;; Describe the name prefix
-           ;; List of commands
-           ((agenda ""
-                    ;; Settings for command
-                    ((org-agenda-overriding-header "Day View")
-                     (org-agenda-span 'day)
-                     (org-agenda-start-day "0d")))
-            (tags-todo "@ai" 
-                       ;; Settings for command
-                       ((org-agenda-overriding-header "AI Tasks")))
-            (tags-todo "@robotics" 
-                       ;; Settings for command
-                       ((org-agenda-overriding-header "Robotics Tasks")))
-            (tags-todo "@ml" 
-                       ;; Settings for command
-                       ((org-agenda-overriding-header "Machine Learning Tasks")))
-            (tags-todo "@dataeng" 
-                       ;; Settings for command
-                       ((org-agenda-overriding-header "Data Engineering Tasks"))))
-           ;; List of 'general-settings-for-whole-set'
-           ((org-agenda-files '("~/org/school.org")))
-           ;; Files to write to
-           ("~/org/school.html"))
-          
-          ;; TODO: This view needs some work.
-          ;; Canvas agenda view
-          ("c" "Canvas" ;; Describe the name prefix
-           ;; List of commands
-           (
-            (search "[W25M-MOBBA]/TODO" 
-                    ;; Settings for command
-                    ((org-agenda-overriding-header "AI Tasks")))
-            (tags-todo "@robotics" 
-                       ;; Settings for command
-                       ((org-agenda-overriding-header "Robotics Tasks")))
-            (tags-todo "@ml" 
-                       ;; Settings for command
-                       ((org-agenda-overriding-header "Machine Learning Tasks")))
-            (tags-todo "@dataeng" 
-                       ;; Settings for command
-                       ((org-agenda-overriding-header "Data Engineering Tasks")))
-            (agenda ""
-                    ;; Settings for command
-                    ((org-agenda-overriding-header "Day View")
-                     (org-agenda-span 9)
-                     (org-agenda-start-day "-1d"))))
-           ;; List of 'general-settings-for-whole-set'
-           ((org-agenda-files '("~/org/calendars/canvas.org")))
-           ;; Files to write to
-           ("~/org/canvas.html")))))
+  ;; Make org-mode use completions from the local buffer
+  (add-hook! 'org-mode-hook :append #'my/org-add-buffer-completions))
 
 ;; Setup some stuff for Magit
 (after! magit
   (setq git-commit-style-convention-checks
         (remove 'overlong-summary-line git-commit-style-convention-checks)))
+
+;; Setup treemacs
+(after! treemacs
+  (treemacs-follow-mode 1))
+
+;; Setup ox-latex stuff
+(load! "./lisp/latex-classes.el")
+
+;; Setup org-agenda stuff
+(load! "./lisp/org-agenda-config.el")
+
