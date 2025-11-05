@@ -100,6 +100,13 @@
 (after! evil
   (evil-ex-define-cmd "ele[vate]" #'+popup/raise))
 
+
+;; Make a new function to org-capture at a point 'org-capture-at-point'
+(defun org-capture-at-point ()
+  "Insert an org-capture template at point."
+  (interactive)
+  (org-capture 0))
+
 ;; Define a few functions for some keymaps
 (defun my/insert-newline-and-move ()
   "Inserts a newline at the current cursor, while keeping the cursor stationary"
@@ -333,4 +340,20 @@ corfu closes, it will be restored to a punctuation character with the
 
 ;; Setup org-agenda stuff
 (load! "./lisp/org-agenda-config.el")
+
+;; Make some custom org-capture templates
+(after! org
+  (add-to-list
+   'org-capture-templates
+   '("c" "Class LU Entry" entry
+     (here)
+     "* [[%^{LU Link}][LU%^{LU Number} -- %^{LU Name}]]
+** Learning Objectives
+** Class Prep.
+*** Checklist
+*** Materials
+*** Notes 
+** Class Lecture
+** Assignments
+** Things to look into" :immediate-finish t)))
 
