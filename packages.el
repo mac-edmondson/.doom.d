@@ -54,12 +54,16 @@
 ;; A bit of the VHDL
 (package! vhdl-ext)
 
-;; org-fragtog for inline latex preview automation
-(package! org-fragtog)
-
 ;; ultra-scroll for smooth scrolling -- really nice for a trackpad
 (package! ultra-scroll)
 
 ;; A package to update ics calendars into org files on a regular interval
 (package! org-ics-import
   :recipe (:repo "https://git.sr.ht/~struanr/org-ics-import.el"))
+
+;; A bit of the fresh ui... for org-roam
+(package! org-roam-ui) 
+
+;; Some nice org features
+(package! org-fragtog)
+(package! org-appear)

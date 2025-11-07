@@ -188,6 +188,50 @@
           "--exclude" ".git" ;; Exclude the .git directory itself
           )))
 
+;; Setup org-roam
+(use-package! org-roam
+  :custom
+  (org-roam-directory (file-truename "~/org/org-roam"))
+  :config
+  (defvar org-roam-templates-directory (concat org-roam-directory "/templates")))
+
+
+(after! org-roam
+  (let ((default-file-name "${slug}.org")
+        (default-header-template "#+title: ${title}\n#+date: %U\n"))
+    (setq org-roam-capture-templates 
+          `(("d" "default" plain 
+             "%?" 
+             :target (file+head ,default-file-name ,default-header-template)
+             :unnarrowed t)
+            ("n" "Basic Note Template" plain 
+             (file ,(concat org-roam-templates-directory "/basic-note.org"))
+             :target (file+head ,default-file-name ,default-header-template)
+             :unnarrowed t)
+            ("u" "Unix Command Template" plain 
+             (file ,(concat org-roam-templates-directory "/unix-command.org"))
+             :target (file+head ,default-file-name ,default-header-template)
+             :unnarrowed t)
+            ("i" "Index Template" plain 
+             (file ,(concat org-roam-templates-directory "/index.org"))
+             :target (file+head ,(concat "index/" default-file-name) ,default-header-template)
+             :unnarrowed t))))) 
+
+;; Setup org-roam-ui
+(use-package! websocket
+  :after org-roam)
+
+(use-package! org-roam-ui
+  :after org-roam 
+  ;; If you want the UI to run on boot, add this
+  ;; :hook (after-init . org-roam-ui-mode)
+  :config
+  (setq org-roam-ui-sync-theme t
+        org-roam-ui-follow t
+        org-roam-ui-update-on-save t
+        org-roam-ui-open-on-start t))
+
+
 ;; Use the org-fragtog package for inline previews
 ;; TODO figure out why this doesn't work. I think you need compiled elisp support?
 ;; (use-package! org-fragtog
