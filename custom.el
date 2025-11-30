@@ -7,9 +7,7 @@
  '(org-ics-import-confirmed-overwrite '("~/org/calendars/canvas.org"))
  '(safe-local-variable-values
    '((eval add-to-list 'org-export-before-processing-functions
-      (lambda
-        (backend)
-        (org-babel-tangle))))))
+      (lambda (backend) (org-babel-tangle))))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

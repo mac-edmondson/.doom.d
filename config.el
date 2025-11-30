@@ -112,8 +112,8 @@
   "Inserts a newline at the current cursor, while keeping the cursor stationary"
   (interactive)
   (insert ?\n)
-  (evil-previous-line)
-  (evil-end-of-line)
+  (evil-previous-visual-line)
+  (evil-end-of-visual-line)
   (append ?\ ))
 
 (defun my/comment-or-uncomment-line-or-region ()
@@ -123,6 +123,10 @@
       (comment-or-uncomment-region (region-beginning) (region-end))
     (comment-or-uncomment-region (line-beginning-position) (line-end-position))))
 
+(defun my/reveal-in-file-explorer ()
+  (interactive)
+  (shell-command "open ."))
+
 (after! evil
   ;; Make it so 'q' doesn't just kill emacs, but instead just closes the current
   ;; buffer
@@ -130,8 +134,10 @@
   (evil-ex-define-cmd "wq" #'doom/save-and-kill-buffer)
   ;; Re-map the 'help-map'
   (map! :leader :desc "help" "H" help-map)
-  ;; Swap the position of the dired and the debug bindings in the open menu
   (map! :leader :prefix "o" 
+        ;; Make a nice binding to open in file
+        (:desc "Reveal in File Explorer" "o" #'my/reveal-in-file-explorer)
+        ;; Swap the position of the dired and the debug bindings in the open menu
         (:desc "Dired" "d" #'dired-jump)
         (:desc "Start a debugger" "-" #'+debugger/start))
   ;; Make some 'extras' keymaps
@@ -146,8 +152,8 @@
   ;; TODO (map! :leader :desc "Open scratch buffer in new winodow" "x" #'+popup/raise)
   ;; Add some custom keybindings
   (map! :leader :n 
-        "l" #'end-of-line
-        "h" #'beginning-of-line)
+        "l" #'evil-end-of-visual-line
+        "h" #'evil-beginning-of-visual-line)
   (map! :n 
         "K" #'my/insert-newline-and-move
         "C-/" #'my/comment-or-uncomment-line-or-region )
@@ -212,9 +218,21 @@
              (file ,(concat org-roam-templates-directory "/unix-command.org"))
              :target (file+head ,default-file-name ,default-header-template)
              :unnarrowed t)
+            ("a" "Algorithm Note Template" plain 
+             (file ,(concat org-roam-templates-directory "/algorithm.org"))
+             :target (file+head ,default-file-name ,default-header-template)
+             :unnarrowed t)
             ("i" "Index Template" plain 
              (file ,(concat org-roam-templates-directory "/index.org"))
              :target (file+head ,(concat "index/" default-file-name) ,default-header-template)
+             :unnarrowed t)
+            ("r" "Reference Template" plain 
+             (file ,(concat org-roam-templates-directory "/reference.org"))
+             :target (file+head ,(concat "references/" default-file-name) ,default-header-template)
+             :unnarrowed t)
+            ("l" "Literature Note Template" plain 
+             (file ,(concat org-roam-templates-directory "/literature-note.org"))
+             :target (file+head ,default-file-name ,default-header-template)
              :unnarrowed t))))) 
 
 ;; Setup org-roam-ui
@@ -233,10 +251,18 @@
 
 
 ;; Use the org-fragtog package for inline previews
-;; TODO figure out why this doesn't work. I think you need compiled elisp support?
-;; (use-package! org-fragtog
-;;   :after org
-;;   :hook (org-mode . org-fragtog)) ; this auto-enables it when you enter an org-buffer
+(use-package! org-fragtog
+  :after org
+  :hook (org-mode . org-fragtog-mode)) ; this auto-enables it when you enter an org-buffer
+
+;; Use the org-appear package for easier editing of pretty text
+(use-package! org-appear
+  :after org
+  :custom
+  ;; See configuration options here: https://github.com/awth13/org-appear
+  (org-appear-autosubmarkers t)
+  (org-appear-inside-latex t)
+  :hook (org-mode . org-appear-mode))
 
 ;; Use the ultra-scroll package
 (use-package! ultra-scroll
@@ -355,15 +381,26 @@ corfu closes, it will be restored to a punctuation character with the
   (add-hook! 'pyvenv-post-activate-hooks :append #'my/pyvenv-activate-deactivate-hook)
   (add-hook! 'pyvenv-post-deactivate-hooks :append #'my/pyvenv-activate-deactivate-hook))
 
+(add-to-list 'exec-path "~/.venv/global/bin")
 (after! python
   ;; On boot of emacs, find the python executable on the path
   ;; TODO make this specific to each machine? Or figure something else out.
-  (setq python-interpreter "~/.venv/global/bin/python3")
+  (let ((p-int  "~/.venv/global/bin/python3"))
+    (setq python-interpreter p-int)
+    (setq python-shell-interpreter p-int)
+    (setq org-babel-python-command p-int))
   ;; Note: For python stuff to work without pain, ensure the executable needed
   ;; are on the path. 'doom doctor' will tell you if anything is missing.
   (setq lsp-pyright-langserver-command "basedpyright"))
 
 (after! org
+  ;; Make opening PDFs in Okular an option.
+  (add-to-list 'org-file-apps '("\\.pdf\\'" . "okular --unique %s"))
+  (add-to-list 'org-file-apps '("\\.x?html?\\'" . "xdg-open %s"))
+  ;; Make latex renderings a bit bigger
+  (when (and (boundp 'my-machine-id) (eq my-machine-id 'machineconst-id-asus))
+    (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.5)))
+
   ;; Make org-mode display line numbers as visual, which displays a relative number even for wrapped lines.
   (add-hook! 'org-mode-hook :append #'my/enable-visual-line-numbers)
 
@@ -380,6 +417,7 @@ corfu closes, it will be restored to a punctuation character with the
   (treemacs-follow-mode 1))
 
 ;; Setup ox-latex stuff
+;; TODO: Consider addint (after! ox-latex) or similar for this load
 (load! "./lisp/latex-classes.el")
 
 ;; Setup org-agenda stuff
@@ -401,3 +439,9 @@ corfu closes, it will be restored to a punctuation character with the
 ** Assignments
 ** Things to look into" :immediate-finish t)))
 
+;; Make the personal dictionary for spell-fu be in a tracked location
+;; Note to self, if you are on a new machine, you may need to run a command to
+;; the effect of this to get the personal dictionary working at all:
+;;   `mkdir -p ~/.emacs.d/.local/etc/ispell && touch ~/.emacs.d/.local/etc/ispell/.pws`
+(after! ispell
+  (setq ispell-personal-dictionary "~/org/dict/dict.pws"))

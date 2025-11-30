@@ -12,6 +12,11 @@
                ("\\paragraph{%s}" . "\\paragraph\*{%s}")  
                ("\\subparagraph{%s}" . "\\subparagraph\*{%s}")))
 
+(setq org-latex-text-markup-alist 
+      '((bold . "\\textbf{%s}") (code . protectedtexttt) (italic . "\\textit{%s}")
+        (strike-through . "\\sout{%s}") (underline . "\\underline{%s}")
+        (verbatim . protectedtexttt)))
+
 (setq org-latex-subtitle-format "}\n\\subtitle{%s")
 
 ;; Setup minted for code block exporting in ox

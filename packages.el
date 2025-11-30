@@ -67,3 +67,4 @@
 ;; Some nice org features
 (package! org-fragtog)
 (package! org-appear)
+;; (package! xenops)

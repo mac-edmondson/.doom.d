@@ -1,6 +1,20 @@
 ;;; scratch.el -*- lexical-binding: t; -*-
 (require 'doom-lib)
 
+(defun my/org-agenda-skip-if-canvas-property-doesnt-match-regex (property regex)
+  ;; Get the position of the end of the current subtree
+  (let ((subtree-end (org-entry-end-position)))
+    ;; Check the CUSTOM_ID property
+    (if (and (or (not (string-match-p "canvas.org" (buffer-file-name)))
+                 (string-match-p
+                  regex
+                  (or (org-entry-get (point) property) ""))))
+        ;; If the file is not the canvas calendar or if it matches the regex, and the state is "TODO" :
+        nil ; Don't skip this entry
+      ;; If it does NOT match (or has no CUSTOM_ID):
+      subtree-end) ;; Skip the entire subtree
+    ))
+
 (defun my/agenda-filter-canvas-property (span property regex)
   `(
     (org-agenda-span ,span)
@@ -9,19 +23,12 @@
     (org-agenda-skip-scheduled-if-done nil)
     (org-agenda-skip-deadline-if-done nil)
     (org-agenda-skip-timestamp-if-done nil)
-    (org-agenda-skip-function
-     #'(lambda ()
-         ;; Get the position of the end of the current subtree
-         (let ((subtree-end (org-entry-end-position)))
-           ;; Check the CUSTOM_ID property
-           (if (or (not (string-match-p "canvas.org" (buffer-file-name)))
-                   (string-match-p
-                    ,regex
-                    (or (org-entry-get (point) ,property) "")))
-               ;; If the file is not the canvas calendar or if it matches:
-               nil ; Don't skip this entry
-             ;; If it does NOT match (or has no CUSTOM_ID):
-             subtree-end)))))) ; Skip the entire subtree
+    (org-deadline-warning-days 7)
+    (org-agenda-skip-function '(or (my/org-agenda-skip-if-canvas-property-doesnt-match-regex ,property ,regex) 
+                                   (org-agenda-skip-entry-if 'nottodo '("TODO" "DONE")))
+                              )
+    )
+  )
 
 (defun my/agenda-filter-on-title (regex)
   `(org-agenda-skip-function
